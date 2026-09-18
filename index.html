@@ -31,6 +31,44 @@
 
   <title>conectaai</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    Captura o evento `beforeinstallprompt` (Chrome/Android) o mais cedo
+    possível — ele pode disparar antes do Flutter terminar de carregar, e o
+    navegador só entrega esse evento uma vez por carregamento de página. O
+    resultado fica guardado em `window.pwaInstall`, que o lado Dart
+    (lib/app/utils/pwa_install.dart) consulta via dart:js_interop para saber
+    se pode oferecer o botão "Baixar app" e para disparar o prompt nativo.
+  -->
+  <script>
+    (function () {
+      window.pwaInstall = {
+        deferredPrompt: null,
+        available: false,
+        trigger: function () {
+          var promptEvent = window.pwaInstall.deferredPrompt;
+          if (!promptEvent) return Promise.resolve(false);
+          window.pwaInstall.deferredPrompt = null;
+          window.pwaInstall.available = false;
+          promptEvent.prompt();
+          return promptEvent.userChoice.then(function (choice) {
+            return choice.outcome === 'accepted';
+          });
+        }
+      };
+      window.addEventListener('beforeinstallprompt', function (event) {
+        event.preventDefault();
+        window.pwaInstall.deferredPrompt = event;
+        window.pwaInstall.available = true;
+        window.dispatchEvent(new Event('pwa-install-availability-changed'));
+      });
+      window.addEventListener('appinstalled', function () {
+        window.pwaInstall.deferredPrompt = null;
+        window.pwaInstall.available = false;
+        window.dispatchEvent(new Event('pwa-install-availability-changed'));
+      });
+    })();
+  </script>
 </head>
 <body>
   <!--
