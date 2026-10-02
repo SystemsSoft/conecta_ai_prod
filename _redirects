@@ -1,0 +1,9 @@
+# Proxy do handler de login do Firebase Auth para o mesmo domínio do app.
+# Sem isso, o signInWithRedirect (usado no celular) depende de ler storage
+# de conectaai-cc9f4.firebaseapp.com dentro de um iframe — o que Safari/iOS,
+# Chrome e Firefox mobile bloqueiam (particionamento de storage de
+# terceiros), e o login com Google volta para a tela de login sem logar.
+# Ver main.dart (_firebaseOptions) e
+# https://firebase.google.com/docs/auth/web/redirect-best-practices
+/__/auth/*  https://conectaai-cc9f4.firebaseapp.com/__/auth/:splat  200
+/__/firebase/*  https://conectaai-cc9f4.firebaseapp.com/__/firebase/:splat  200
