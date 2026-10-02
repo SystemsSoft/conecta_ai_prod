@@ -40,6 +40,21 @@
     (lib/app/utils/pwa_install.dart) consulta via dart:js_interop para saber
     se pode oferecer o botão "Baixar app" e para disparar o prompt nativo.
   -->
+  <!--
+    A landing comercial é uma página estática (landing.html). Quem abre a
+    raiz do site sem rota do app (`/`, `/#`, `/#/`) vai direto para ela, sem
+    esperar o Flutter carregar. As demais rotas (#/login, #/register, ...)
+    seguem para o app normalmente.
+  -->
+  <script>
+    (function () {
+      var hash = window.location.hash;
+      if (!hash || hash === '#' || hash === '#/') {
+        window.location.replace(new URL('landing.html', document.baseURI).href);
+      }
+    })();
+  </script>
+
   <script>
     (function () {
       window.pwaInstall = {

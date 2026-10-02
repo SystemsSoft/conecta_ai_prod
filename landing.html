@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ConectaAI — Campanhas com creators a partir de uma conversa</title>
+  <meta name="description" content="Diga o que você quer fazer. A ConectaAI transforma sua intenção em campanha, encontra os creators certos, estrutura o acordo e acompanha contrato, pagamento e resultados.">
+  <link rel="icon" type="image/png" href="favicon.png?v=2">
+  <link rel="apple-touch-icon" href="favicon.png?v=2">
+  <meta property="og:title" content="ConectaAI">
+  <meta property="og:description" content="Uma conversa. Uma campanha completa com creators.">
+  <meta property="og:image" content="favicon.png?v=2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2454FF;
+      --primary-dark: #1330A6;
+      --primary-light: #E8EDFF;
+      --accent: #7C3AED;
+      --accent-light: #F1E8FE;
+      --cyan: #0EA5E9;
+      --bg: #FBFBFD;
+      --surface: #FFFFFF;
+      --muted: #F5F6F8;
+      --border: #E7E8EC;
+      --border-strong: #D7D9E0;
+      --text: #0B1220;
+      --text-2: #5B6272;
+      --text-3: #8A90A0;
+      --success: #16A34A;
+      --success-bg: #EAF9F0;
+      --warning: #D97706;
+      --warning-bg: #FEF3E2;
+      --grad: linear-gradient(135deg, #7C3AED 0%, #2454FF 55%, #0EA5E9 100%);
+      --shadow-sm: 0 1px 2px rgba(11,18,32,.04), 0 2px 8px rgba(11,18,32,.04);
+      --shadow-md: 0 4px 12px rgba(11,18,32,.06), 0 16px 40px rgba(11,18,32,.08);
+      --radius: 16px;
+      --radius-lg: 24px;
+      --max: 1160px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    section[id] { scroll-margin-top: 72px; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    @media (max-width: 640px) { .container { padding: 0 16px; } }
+
+    /* Logo: recorta a área útil do favicon.png (1254×1254, conteúdo em 193..1055 × 338..848) */
+    .logo {
+      --h: 48px;
+      display: inline-block;
+      height: var(--h);
+      width: calc(var(--h) * 862 / 510);
+      background: url('favicon.png?v=2') no-repeat;
+      background-size: calc(var(--h) * 1254 / 510);
+      background-position: calc(var(--h) * -193 / 510) calc(var(--h) * -338 / 510);
+    }
+    .logo-mark {
+      --h: 36px;
+      display: inline-block;
+      height: var(--h);
+      width: calc(var(--h) * 537 / 320);
+      background: url('favicon.png?v=2') no-repeat;
+      background-size: calc(var(--h) * 1254 / 320);
+      background-position: calc(var(--h) * -360 / 320) calc(var(--h) * -338 / 320);
+    }
+
+    /* Header */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(251,251,253,.82);
+      backdrop-filter: saturate(180%) blur(14px);
+      -webkit-backdrop-filter: saturate(180%) blur(14px);
+      border-bottom: 1px solid transparent;
+      transition: border-color .2s;
+    }
+    header.scrolled { border-bottom-color: var(--border); }
+    .nav { display: flex; align-items: center; gap: 32px; height: 72px; }
+    .nav-links { display: flex; gap: 28px; font-size: 15px; font-weight: 500; color: var(--text-2); margin-left: 16px; white-space: nowrap; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    @media (max-width: 1080px) { .nav-links { display: none; } }
+    @media (max-width: 480px) { .nav-cta .btn-ghost { display: none; } .nav .logo { --h: 40px; } }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-weight: 600; font-size: 15px; border-radius: 999px;
+      padding: 12px 22px; border: 1px solid transparent; cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .15s;
+      white-space: nowrap;
+    }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 6px 18px rgba(36,84,255,.28); }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+    .btn-secondary:hover { border-color: var(--text-3); }
+    .btn-ghost { color: var(--text-2); padding: 10px 14px; }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-lg { padding: 15px 28px; font-size: 16px; }
+    .btn-white { background: #fff; color: var(--primary-dark); }
+    .btn-white:hover { transform: translateY(-1px); }
+    .btn-outline-white { color: #fff; border-color: rgba(255,255,255,.45); }
+    .btn-outline-white:hover { border-color: #fff; }
+
+    /* Typography */
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: var(--accent);
+      background: var(--accent-light); padding: 6px 14px; border-radius: 999px;
+    }
+    .eyebrow svg { width: 14px; height: 14px; }
+    .overline { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--primary); }
+    h1 { font-size: clamp(38px, 6vw, 68px); line-height: 1.04; letter-spacing: -.035em; font-weight: 800; }
+    h2 { font-size: clamp(30px, 4.2vw, 46px); line-height: 1.1; letter-spacing: -.03em; font-weight: 800; }
+    h3 { font-size: 20px; line-height: 1.3; letter-spacing: -.01em; font-weight: 700; }
+    .lead { font-size: clamp(17px, 1.6vw, 20px); color: var(--text-2); }
+    .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .section { padding: 112px 0; }
+    @media (max-width: 640px) { .section { padding: 72px 0; } }
+    .section-head { text-align: center; max-width: 720px; margin: 0 auto 56px; }
+    .section-head h2 { margin: 12px 0 16px; }
+
+    /* Hero */
+    .hero { position: relative; padding: 72px 0 96px; overflow: hidden; }
+    .hero::before {
+      content: ''; position: absolute; top: -260px; left: 50%; transform: translateX(-50%);
+      width: 1100px; height: 640px; border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(124,58,237,.16), rgba(36,84,255,.10) 55%, transparent);
+      pointer-events: none;
+    }
+    .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+    .hero h1 { margin: 20px 0 20px; }
+    .hero .lead { max-width: 540px; }
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+    .hero-points { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 28px; color: var(--text-2); font-size: 14px; }
+    .hero-points span { display: inline-flex; align-items: center; gap: 6px; }
+    .hero-points svg { width: 16px; height: 16px; color: var(--success); }
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .hero-copy { text-align: center; }
+      .hero .lead { margin: 0 auto; }
+      .hero-ctas, .hero-points { justify-content: center; }
+    }
+
+    /* Chat demo */
+    .chat {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+      overflow: hidden; max-width: 520px; margin: 0 auto; width: 100%;
+    }
+    .chat-top {
+      display: flex; align-items: center; gap: 10px; padding: 14px 18px;
+      border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600;
+    }
+    .chat-top .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px var(--success-bg); }
+    .chat-top small { margin-left: auto; color: var(--text-3); font-weight: 500; font-size: 12px; }
+    .chat-body { padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; min-height: 420px; }
+    .msg { max-width: 88%; font-size: 14.5px; padding: 12px 16px; border-radius: 18px; opacity: 0; transform: translateY(8px); transition: opacity .45s, transform .45s; }
+    .msg.show { opacity: 1; transform: none; }
+    .msg-user { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 6px; }
+    .msg-ai { align-self: flex-start; background: var(--muted); border-bottom-left-radius: 6px; }
+    .msg-ai .who { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+    .msg-ai .who svg { width: 13px; height: 13px; }
+    .typing { display: inline-flex; gap: 4px; padding: 4px 0; }
+    .typing[hidden] { display: none; }
+    .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); animation: blink 1.2s infinite; }
+    .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+    .campaign-card {
+      align-self: stretch; border: 1px solid var(--border); border-radius: 16px; padding: 16px;
+      background: linear-gradient(180deg, #fff, #FAFBFF);
+      opacity: 0; transform: translateY(8px); transition: opacity .45s, transform .45s;
+    }
+    .campaign-card.show { opacity: 1; transform: none; }
+    .campaign-card .cc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .campaign-card .cc-head b { font-size: 14px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+    .pill-green { background: var(--success-bg); color: var(--success); }
+    .pill-blue { background: var(--primary-light); color: var(--primary); }
+    .pill-purple { background: var(--accent-light); color: var(--accent); }
+    .pill-amber { background: var(--warning-bg); color: var(--warning); }
+    .cc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .cc-field { background: var(--muted); border-radius: 10px; padding: 8px 10px; }
+    .cc-field small { display: block; font-size: 11px; color: var(--text-3); font-weight: 500; }
+    .cc-field span { font-size: 13px; font-weight: 600; }
+    .cc-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .cc-actions .btn { padding: 9px 14px; font-size: 13px; }
+    .chat-input { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); padding: 12px 14px; color: var(--text-3); font-size: 14px; }
+    .chat-input .mic { margin-left: auto; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #fff; }
+    .chat-input .mic svg { width: 16px; height: 16px; }
+
+    /* Trust strip */
+    .strip { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+    .strip-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .strip-item { padding: 28px 24px; display: flex; gap: 14px; align-items: flex-start; }
+    .strip-item + .strip-item { border-left: 1px solid var(--border); }
+    .strip-item .ic { flex: none; }
+    .strip-item b { display: block; font-size: 15px; }
+    .strip-item span { font-size: 14px; color: var(--text-2); }
+    @media (max-width: 900px) {
+      .strip-grid { grid-template-columns: 1fr 1fr; }
+      .strip-item:nth-child(3) { border-left: 0; }
+      .strip-item:nth-child(n+3) { border-top: 1px solid var(--border); }
+    }
+    @media (max-width: 540px) {
+      .strip-grid { grid-template-columns: 1fr; }
+      .strip-item + .strip-item { border-left: 0; border-top: 1px solid var(--border); }
+    }
+
+    .ic {
+      width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+      background: var(--primary-light); color: var(--primary);
+    }
+    .ic svg { width: 20px; height: 20px; }
+    .ic-grad { background: var(--grad); color: #fff; }
+    .ic-purple { background: var(--accent-light); color: var(--accent); }
+    .ic-green { background: var(--success-bg); color: var(--success); }
+
+    /* Steps (como funciona) */
+    .flow { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .step {
+      position: relative; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm);
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+    .step:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+    .step-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .step-num { font-size: 14px; font-weight: 800; color: var(--text-3); letter-spacing: .04em; }
+    .step h3 { margin-bottom: 8px; }
+    .step p { color: var(--text-2); font-size: 15px; }
+    .step .who-tag { margin-top: 16px; }
+    @media (max-width: 900px) { .flow { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .flow { grid-template-columns: 1fr; } }
+
+    .flow-line {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 6px; margin-top: 40px;
+      font-size: 14px; font-weight: 600; color: var(--text-2);
+    }
+    .flow-line span { padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+    .flow-line i { color: var(--text-3); font-style: normal; align-self: center; }
+
+    /* Split sections */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+    .split.reverse .split-copy { order: 2; }
+    .split-copy h2 { margin: 12px 0 18px; }
+    .split-copy .lead { margin-bottom: 28px; }
+    @media (max-width: 960px) {
+      .split { grid-template-columns: 1fr; gap: 40px; }
+      .split.reverse .split-copy { order: 0; }
+    }
+    .checks { list-style: none; display: grid; gap: 14px; }
+    .checks li { display: flex; gap: 12px; align-items: flex-start; font-size: 15.5px; }
+    .checks li svg { flex: none; width: 20px; height: 20px; color: var(--primary); margin-top: 2px; }
+    .checks li b { display: block; }
+    .checks li span { color: var(--text-2); }
+
+    .panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md); padding: 24px;
+    }
+    .panel-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; gap: 12px; }
+    .panel-title b { font-size: 15px; }
+    .panel-title small { color: var(--text-3); font-size: 13px; }
+
+    /* Intents */
+    .intents { display: grid; gap: 12px; }
+    .intent {
+      display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px;
+      border: 1px solid var(--border); border-radius: 14px; background: var(--surface);
+      font-size: 15px; transition: border-color .2s, background .2s;
+    }
+    .intent:hover { border-color: var(--primary); background: #FCFDFF; }
+    .intent .ic { width: 34px; height: 34px; border-radius: 10px; flex: none; }
+    .intent .ic svg { width: 16px; height: 16px; }
+    .intent small { display: block; color: var(--text-3); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+    .arrow-down { display: flex; justify-content: center; color: var(--text-3); padding: 2px 0; }
+    .arrow-down svg { width: 20px; height: 20px; }
+    .structured { border: 1.5px dashed var(--primary); background: var(--primary-light); border-radius: 14px; padding: 16px 18px; }
+    .structured .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .tag { font-size: 13px; font-weight: 600; background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; display: inline-flex; gap: 6px; align-items: center; }
+    .tag svg { width: 13px; height: 13px; color: var(--success); }
+
+    /* Match */
+    .creator { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; }
+    .avatar {
+      width: 52px; height: 52px; border-radius: 50%; flex: none;
+      display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 18px;
+      background: linear-gradient(135deg, #DB2777, #7C3AED);
+    }
+    .creator b { display: block; font-size: 16px; }
+    .creator span { color: var(--text-2); font-size: 13.5px; }
+    .score {
+      margin-left: auto; text-align: center; flex: none;
+      width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+      background: conic-gradient(var(--success) calc(var(--v) * 1%), var(--muted) 0);
+      position: relative;
+    }
+    .score::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #fff; }
+    .score b { position: relative; z-index: 1; font-size: 17px; color: var(--success); }
+    .bars { display: grid; gap: 12px; }
+    .bar-row { display: grid; grid-template-columns: 150px 1fr 40px; gap: 12px; align-items: center; font-size: 13.5px; }
+    .bar-row span:first-child { color: var(--text-2); }
+    .bar { height: 8px; border-radius: 99px; background: var(--muted); overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--grad); transition: width 1.1s cubic-bezier(.2,.8,.2,1); }
+    .bar-row b { text-align: right; font-size: 13px; }
+    .reason { margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: var(--accent-light); font-size: 14px; color: #4C1D95; display: flex; gap: 10px; }
+    .reason svg { width: 18px; height: 18px; flex: none; color: var(--accent); margin-top: 1px; }
+    @media (max-width: 480px) { .bar-row { grid-template-columns: 112px 1fr 34px; } }
+
+    /* Deal */
+    .deal-terms { display: grid; gap: 2px; margin-bottom: 18px; }
+    .term { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14.5px; }
+    .term:last-child { border-bottom: 0; }
+    .term span { color: var(--text-2); display: inline-flex; align-items: center; gap: 8px; }
+    .term span svg { width: 16px; height: 16px; color: var(--success); }
+    .term b { text-align: right; }
+    .deal-total { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--muted); border-radius: 12px; margin-bottom: 16px; }
+    .deal-total small { color: var(--text-2); font-size: 13px; }
+    .deal-total b { font-size: 22px; letter-spacing: -.02em; }
+    .approvals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .approval { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; font-size: 13px; display: flex; gap: 8px; align-items: center; }
+    .approval svg { width: 16px; height: 16px; flex: none; }
+    .approval.ok { border-color: #BBE7CB; background: var(--success-bg); color: #166534; }
+    .approval.wait { border-color: #F8D9A8; background: var(--warning-bg); color: #92400E; }
+    .deal-actions { display: flex; gap: 10px; }
+    .deal-actions .btn { flex: 1; }
+
+    /* Payment timeline */
+    .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; margin-top: 8px; }
+    .timeline::before { content: ''; position: absolute; top: 22px; left: 12.5%; right: 12.5%; height: 2px; background: var(--border); }
+    .timeline::after { content: ''; position: absolute; top: 22px; left: 12.5%; height: 2px; width: var(--progress, 0%); background: var(--grad); transition: width 1.4s ease; }
+    .tl { position: relative; z-index: 1; text-align: center; padding: 0 10px; }
+    .tl .node { width: 46px; height: 46px; border-radius: 50%; margin: 0 auto 14px; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--border); color: var(--text-3); transition: all .4s; }
+    .tl .node svg { width: 20px; height: 20px; }
+    .tl.on .node { border-color: transparent; background: var(--grad); color: #fff; box-shadow: 0 6px 16px rgba(36,84,255,.3); }
+    .tl b { display: block; font-size: 15px; margin-bottom: 4px; }
+    .tl span { font-size: 13.5px; color: var(--text-2); }
+    @media (max-width: 760px) {
+      .timeline { grid-template-columns: 1fr; gap: 22px; }
+      .timeline::before, .timeline::after { display: none; }
+      .tl { display: grid; grid-template-columns: 46px 1fr; gap: 14px; text-align: left; align-items: center; padding: 0; }
+      .tl .node { margin: 0; }
+    }
+
+    /* Audiences */
+    .aud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .aud { border-radius: var(--radius-lg); padding: 40px; border: 1px solid var(--border); background: var(--surface); position: relative; overflow: hidden; }
+    .aud.dark { background: #0B1220; color: #fff; border-color: #0B1220; }
+    .aud.dark::before { content: ''; position: absolute; right: -120px; top: -120px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(closest-side, rgba(124,58,237,.55), transparent); }
+    .aud h3 { font-size: 26px; letter-spacing: -.02em; margin: 14px 0 10px; position: relative; }
+    .aud > p { color: var(--text-2); margin-bottom: 26px; position: relative; }
+    .aud.dark > p { color: #A9B0C2; }
+    .aud .checks { position: relative; margin-bottom: 30px; }
+    .aud.dark .checks li svg { color: #8FA8FF; }
+    .aud.dark .checks li span { color: #A9B0C2; }
+    .aud .quote { position: relative; font-size: 14.5px; font-style: italic; padding: 14px 16px; border-radius: 12px; margin-bottom: 26px; background: var(--muted); color: var(--text-2); }
+    .aud.dark .quote { background: rgba(255,255,255,.07); color: #D5DAE6; }
+    @media (max-width: 900px) { .aud-grid { grid-template-columns: 1fr; } .aud { padding: 28px; } }
+
+    /* Control */
+    .levels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .level { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+    .level h3 { font-size: 16px; margin: 14px 0 6px; }
+    .level p { font-size: 14px; color: var(--text-2); }
+    .level .pill { margin-top: 14px; }
+    @media (max-width: 900px) { .levels { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 520px) { .levels { grid-template-columns: 1fr; } }
+
+    /* Dashboard */
+    .dash { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); overflow: hidden; }
+    .dash-head { display: flex; align-items: center; gap: 12px; padding: 18px 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .dash-head b { font-size: 16px; }
+    .dash-head .pill { margin-left: auto; }
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .kpi { padding: 22px 24px; }
+    .kpi + .kpi { border-left: 1px solid var(--border); }
+    .kpi small { color: var(--text-2); font-size: 13px; display: block; }
+    .kpi b { font-size: 28px; letter-spacing: -.02em; display: block; margin: 4px 0 2px; }
+    .kpi em { font-style: normal; font-size: 12.5px; color: var(--success); font-weight: 600; }
+    .dash-body { display: grid; grid-template-columns: 1.4fr 1fr; border-top: 1px solid var(--border); }
+    .chart { padding: 22px 24px; }
+    .chart small { color: var(--text-2); font-size: 13px; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 10px; height: 150px; margin-top: 16px; }
+    .chart-bars div { flex: 1; border-radius: 6px 6px 2px 2px; background: var(--primary-light); height: 0; transition: height 1s cubic-bezier(.2,.8,.2,1); position: relative; }
+    .chart-bars div.hi { background: var(--grad); }
+    .chart-x { display: flex; gap: 10px; margin-top: 8px; font-size: 11.5px; color: var(--text-3); }
+    .chart-x span { flex: 1; text-align: center; }
+    .list { border-left: 1px solid var(--border); padding: 14px 0; }
+    .li { display: flex; align-items: center; gap: 12px; padding: 10px 24px; font-size: 14px; }
+    .li .avatar { width: 34px; height: 34px; font-size: 13px; }
+    .li .pill { margin-left: auto; }
+    .li div span { display: block; font-size: 12.5px; color: var(--text-3); }
+    @media (max-width: 900px) {
+      .kpis { grid-template-columns: 1fr 1fr; }
+      .kpi:nth-child(3) { border-left: 0; }
+      .kpi:nth-child(n+3) { border-top: 1px solid var(--border); }
+      .dash-body { grid-template-columns: 1fr; }
+      .list { border-left: 0; border-top: 1px solid var(--border); }
+    }
+    .disclaimer { text-align: center; color: var(--text-3); font-size: 13px; margin-top: 16px; }
+
+    /* FAQ */
+    .faq { max-width: 780px; margin: 0 auto; display: grid; gap: 12px; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0 22px; }
+    details[open] { box-shadow: var(--shadow-sm); }
+    summary { cursor: pointer; list-style: none; padding: 20px 0; font-weight: 600; font-size: 16px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+    summary::-webkit-details-marker { display: none; }
+    summary svg { width: 18px; height: 18px; flex: none; color: var(--text-3); transition: transform .2s; }
+    details[open] summary svg { transform: rotate(45deg); }
+    details p { color: var(--text-2); padding: 0 0 20px; font-size: 15px; }
+
+    /* CTA */
+    .cta {
+      position: relative; overflow: hidden; border-radius: 32px; padding: 80px 40px; text-align: center; color: #fff;
+      background: linear-gradient(135deg, #5B21B6 0%, #2454FF 55%, #0284C7 100%);
+    }
+    .cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(600px 300px at 20% 0%, rgba(255,255,255,.18), transparent 70%), radial-gradient(500px 260px at 90% 100%, rgba(14,165,233,.35), transparent 70%); }
+    .cta > * { position: relative; }
+    .cta h2 { margin-bottom: 16px; }
+    .cta p { color: rgba(255,255,255,.85); font-size: 18px; max-width: 560px; margin: 0 auto 32px; }
+    .cta .hero-ctas { justify-content: center; margin-top: 0; }
+    @media (max-width: 640px) { .cta { padding: 56px 22px; border-radius: 24px; } }
+
+    footer { padding: 56px 0 40px; }
+    .foot { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-top: 32px; border-top: 1px solid var(--border); }
+    .foot p { color: var(--text-3); font-size: 13.5px; }
+    .foot-links { display: flex; gap: 22px; font-size: 14px; color: var(--text-2); }
+    .foot-links a:hover { color: var(--text); }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal, .msg, .campaign-card { opacity: 1; transform: none; transition: none; }
+      .bar i, .chart-bars div, .timeline::after { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ícones (estilo Lucide) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.94 14.06 8 20l-1.94-5.94L0 12l6.06-1.94L8 4l1.94 6.06L16 12z" transform="translate(2 0) scale(.9)"/><path d="M20 3v4"/><path d="M22 5h-4"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></symbol>
+      <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+      <symbol id="i-layout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></symbol>
+      <symbol id="i-radar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+      <symbol id="i-file-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></symbol>
+      <symbol id="i-badge-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+      <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></symbol>
+      <symbol id="i-user-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    </defs>
+  </svg>
+
+  <header id="top">
+    <div class="container nav">
+      <a href="#top" aria-label="ConectaAI — início"><span class="logo" role="img" aria-label="ConectaAI"></span></a>
+      <nav class="nav-links" aria-label="Principal">
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#descoberta">Descoberta</a>
+        <a href="#acordo">Acordo e pagamento</a>
+        <a href="#para-quem">Para quem</a>
+        <a href="#faq">Dúvidas</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-ghost" href="./#/login">Entrar</a>
+        <a class="btn btn-primary" href="./#/register">Começar agora</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow"><svg><use href="#i-sparkles"/></svg>Marketing de influência guiado por IA</span>
+          <h1>Diga o que você quer fazer.<br><span class="grad-text">A ConectaAI faz acontecer.</span></h1>
+          <p class="lead">Conte seu objetivo por texto ou voz. A IA monta a campanha, encontra os creators certos, estrutura o acordo e acompanha contrato, pagamento e entrega — tudo em um só lugar.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary btn-lg" href="./#/register">Começar uma conversa <svg><use href="#i-arrow-right"/></svg></a>
+            <a class="btn btn-secondary btn-lg" href="#como-funciona">Ver como funciona <svg><use href="#i-chevron-down"/></svg></a>
+          </div>
+          <div class="hero-points">
+            <span><svg><use href="#i-check-circle"/></svg>Sem formulários complexos</span>
+            <span><svg><use href="#i-check-circle"/></svg>Você aprova cada acordo</span>
+            <span><svg><use href="#i-check-circle"/></svg>Pagamento protegido</span>
+          </div>
+        </div>
+
+        <div class="chat" id="heroChat" aria-label="Exemplo de conversa com a ConectaAI">
+          <div class="chat-top">
+            <span class="logo-mark" aria-hidden="true"></span>
+            Assistente ConectaAI
+            <small><span class="dot" style="display:inline-block;margin-right:6px;vertical-align:middle"></span>online</small>
+          </div>
+          <div class="chat-body">
+            <div class="msg msg-user" data-step="0">Quero 10 creators de beleza em Volta Redonda e região para divulgar minha clínica de estética. Tenho R$ 6 mil.</div>
+            <div class="msg msg-ai" data-step="1">
+              <div class="who"><svg><use href="#i-sparkles"/></svg>ConectaAI</div>
+              <span class="typing" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ai-text" hidden>Entendi seu objetivo. Montei a campanha e já encontrei 14 creators compatíveis:</span>
+            </div>
+            <div class="campaign-card" data-step="2">
+              <div class="cc-head"><b>Campanha · Clínica Estética</b><span class="pill pill-green"><svg width="12" height="12"><use href="#i-check"/></svg>Pronta</span></div>
+              <div class="cc-grid">
+                <div class="cc-field"><small>Objetivo</small><span>Awareness local</span></div>
+                <div class="cc-field"><small>Orçamento</small><span>R$ 6.000</span></div>
+                <div class="cc-field"><small>Perfil</small><span>Beleza · 5k–80k</span></div>
+                <div class="cc-field"><small>Entregáveis</small><span>Reels + Stories</span></div>
+                <div class="cc-field"><small>Região</small><span>Sul Fluminense</span></div>
+                <div class="cc-field"><small>Prazo</small><span>30 dias</span></div>
+              </div>
+              <div class="cc-actions">
+                <span class="btn btn-primary">Ver creators</span>
+                <span class="btn btn-secondary">Ajustar</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input">
+            O que você quer fazer?
+            <span class="mic"><svg><use href="#i-mic"/></svg></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRIP -->
+    <section class="strip">
+      <div class="container strip-grid">
+        <div class="strip-item"><span class="ic"><svg><use href="#i-message"/></svg></span><div><b>Fale naturalmente</b><span>Texto ou voz, sem jargão.</span></div></div>
+        <div class="strip-item"><span class="ic ic-purple"><svg><use href="#i-target"/></svg></span><div><b>Match explicado</b><span>Você sabe por que cada creator.</span></div></div>
+        <div class="strip-item"><span class="ic"><svg><use href="#i-file-check"/></svg></span><div><b>Acordos claros</b><span>Termos estruturados e aprovados.</span></div></div>
+        <div class="strip-item"><span class="ic ic-green"><svg><use href="#i-shield"/></svg></span><div><b>Pagamento seguro</b><span>Liberado só após a entrega.</span></div></div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="section" id="como-funciona">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="overline">Como funciona</span>
+          <h2>Uma conversa.<br>Uma campanha completa.</h2>
+          <p class="lead">Do primeiro “eu quero” até o relatório de resultados, a ConectaAI organiza cada etapa — e você decide o que segue.</p>
+        </div>
+
+        <div class="flow">
+          <article class="step reveal">
+            <div class="step-top"><span class="step-num">01</span><span class="ic"><svg><use href="#i-mic"/></svg></span></div>
+            <h3>Você conta o objetivo</h3>
+            <p>Explique por texto ou voz o que quer alcançar: público, região, orçamento, prazo. Do seu jeito.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-top"><span class="step-num">02</span><span class="ic ic-purple"><svg><use href="#i-sparkles"/></svg></span></div>
+            <h3>A IA monta a campanha</h3>
+            <p>Sua intenção vira uma campanha estruturada — objetivo, perfil ideal, entregáveis, orçamento e regras de aprovação.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-top"><span class="step-num">03</span><span class="ic"><svg><use href="#i-radar"/></svg></span></div>
+            <h3>Descoberta inteligente</h3>
+            <p>A ConectaAI cruza nicho, audiência, localização, engajamento e histórico para recomendar os creators mais compatíveis.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-top"><span class="step-num">04</span><span class="ic"><svg><use href="#i-send"/></svg></span></div>
+            <h3>Propostas em um clique</h3>
+            <p>Envie convites para os creators escolhidos — ou receba candidaturas de quem se encaixa na sua campanha.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-top"><span class="step-num">05</span><span class="ic ic-purple"><svg><use href="#i-file-check"/></svg></span></div>
+            <h3>Acordo estruturado</h3>
+            <p>Os termos viram um acordo claro: entregáveis, prazos, valores e uso de conteúdo. Os dois lados revisam e aprovam.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-top"><span class="step-num">06</span><span class="ic ic-green"><svg><use href="#i-badge-check"/></svg></span></div>
+            <h3>Contrato, entrega e pagamento</h3>
+            <p>Contrato gerado, pagamento protegido, conteúdo entregue e revisado, valor liberado. E os resultados no seu painel.</p>
+          </article>
+        </div>
+
+        <div class="flow-line reveal" aria-label="Resumo do fluxo">
+          <span>Fale</span><i>→</i><span>Estruture</span><i>→</i><span>Encontre</span><i>→</i><span>Proponha</span><i>→</i><span>Aprove</span><i>→</i><span>Entregue</span><i>→</i><span>Meça</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- LINGUAGEM NATURAL -->
+    <section class="section" style="padding-top:0">
+      <div class="container split">
+        <div class="split-copy reveal">
+          <span class="overline">Linguagem natural</span>
+          <h2>Você não configura uma campanha. Você conversa.</h2>
+          <p class="lead">Esqueça formulários, filtros e planilhas. A ConectaAI interpreta o que você disse e transforma em parâmetros concretos — que você pode revisar e ajustar a qualquer momento.</p>
+          <ul class="checks">
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Texto ou voz</b><span>Fale como falaria com uma pessoa da sua equipe.</span></div></li>
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Campanha pronta em segundos</b><span>Objetivo, perfil, entregáveis, orçamento e prazos.</span></div></li>
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Sempre editável</b><span>Mudou de ideia? É só dizer.</span></div></li>
+          </ul>
+        </div>
+        <div class="panel reveal">
+          <div class="intents">
+            <div class="intent"><span class="ic"><svg><use href="#i-building"/></svg></span><div><small>Empresa</small>“Quero lançar meu produto com creators de fitness em São Paulo.”</div></div>
+            <div class="intent"><span class="ic"><svg><use href="#i-building"/></svg></span><div><small>Empresa</small>“Preciso de 30 creators para uma campanha nacional e tenho R$ 50 mil.”</div></div>
+            <div class="intent"><span class="ic ic-purple"><svg><use href="#i-user-star"/></svg></span><div><small>Creator</small>“Quero encontrar marcas de beleza procurando creators como eu.”</div></div>
+          </div>
+          <div class="arrow-down"><svg><use href="#i-chevron-down"/></svg></div>
+          <div class="structured">
+            <b style="font-size:14px;display:flex;align-items:center;gap:8px;color:var(--primary-dark)"><svg width="16" height="16"><use href="#i-sparkles"/></svg>A ConectaAI estrutura automaticamente</b>
+            <div class="tags">
+              <span class="tag"><svg><use href="#i-check"/></svg>Objetivo</span>
+              <span class="tag"><svg><use href="#i-check"/></svg>Orçamento</span>
+              <span class="tag"><svg><use href="#i-check"/></svg>Perfil ideal</span>
+              <span class="tag"><svg><use href="#i-check"/></svg>Entregáveis</span>
+              <span class="tag"><svg><use href="#i-check"/></svg>Região</span>
+              <span class="tag"><svg><use href="#i-check"/></svg>Prazos</span>
+              <span class="tag"><svg><use href="#i-check"/></svg>Regras de aprovação</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESCOBERTA -->
+    <section class="section" id="descoberta" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+      <div class="container split reverse">
+        <div class="split-copy reveal">
+          <span class="overline">Descoberta inteligente</span>
+          <h2>Não procuramos o maior perfil. Procuramos o melhor match.</h2>
+          <p class="lead">Seguidores não contam a história toda. A IA cruza dezenas de sinais para recomendar quem realmente entrega resultado para o seu objetivo — e explica o porquê.</p>
+          <ul class="checks">
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Score de compatibilidade</b><span>Nicho, audiência, região, formato e orçamento.</span></div></li>
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Reputação real</b><span>Histórico de entregas e confiabilidade na plataforma.</span></div></li>
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Raciocínio transparente</b><span>Cada recomendação vem com a justificativa.</span></div></li>
+          </ul>
+        </div>
+        <div class="panel reveal" id="matchPanel">
+          <div class="creator">
+            <span class="avatar">MS</span>
+            <div><b>Mariana Souza</b><span>@mari.skin · 42 mil seguidores · Volta Redonda</span></div>
+            <span class="score" style="--v:94"><b>94</b></span>
+          </div>
+          <div class="bars">
+            <div class="bar-row"><span>Nicho e conteúdo</span><span class="bar"><i data-w="97"></i></span><b>97</b></div>
+            <div class="bar-row"><span>Audiência local</span><span class="bar"><i data-w="92"></i></span><b>92</b></div>
+            <div class="bar-row"><span>Engajamento</span><span class="bar"><i data-w="89"></i></span><b>89</b></div>
+            <div class="bar-row"><span>Histórico de entregas</span><span class="bar"><i data-w="100"></i></span><b>100</b></div>
+            <div class="bar-row"><span>Cabe no orçamento</span><span class="bar"><i data-w="90"></i></span><b>90</b></div>
+          </div>
+          <div class="reason"><svg><use href="#i-sparkles"/></svg><span>78% da audiência está a até 40 km da clínica, engajamento 3× acima da média do nicho e 12 campanhas entregues no prazo.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACORDO -->
+    <section class="section" id="acordo">
+      <div class="container split">
+        <div class="split-copy reveal">
+          <span class="overline">Acordo e aprovação</span>
+          <h2>Termos claros. Aprovação dos dois lados.</h2>
+          <p class="lead">Quando empresa e creator se entendem, a ConectaAI transforma a proposta em um acordo estruturado. Nada avança sem a sua aprovação.</p>
+          <ul class="checks">
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Tudo por escrito</b><span>Entregáveis, prazos, valores, uso de imagem e exclusividade.</span></div></li>
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Dupla aprovação</b><span>Empresa e creator revisam e confirmam antes do contrato.</span></div></li>
+            <li><svg><use href="#i-check-circle"/></svg><div><b>Contrato automático</b><span>Gerado a partir do acordo aprovado, pronto para assinar.</span></div></li>
+          </ul>
+        </div>
+        <div class="panel reveal">
+          <div class="panel-title"><b>Acordo · Mariana Souza</b><span class="pill pill-amber"><svg width="12" height="12"><use href="#i-clock"/></svg>Aguardando você</span></div>
+          <div class="deal-terms">
+            <div class="term"><span><svg><use href="#i-check"/></svg>Entregáveis</span><b>2 Reels + 4 Stories</b></div>
+            <div class="term"><span><svg><use href="#i-check"/></svg>Prazo de publicação</span><b>até 15/11</b></div>
+            <div class="term"><span><svg><use href="#i-check"/></svg>Uso de conteúdo</span><b>Orgânico · 90 dias</b></div>
+            <div class="term"><span><svg><use href="#i-check"/></svg>Exclusividade</span><b>Não</b></div>
+            <div class="term"><span><svg><use href="#i-check"/></svg>Pagamento</span><b>Após aprovação da entrega</b></div>
+          </div>
+          <div class="deal-total"><small>Valor total</small><b>R$ 650,00</b></div>
+          <div class="approvals">
+            <div class="approval ok"><svg><use href="#i-check-circle"/></svg>Creator aprovou</div>
+            <div class="approval wait"><svg><use href="#i-clock"/></svg>Empresa pendente</div>
+          </div>
+          <div class="deal-actions">
+            <span class="btn btn-secondary">Revisar</span>
+            <span class="btn btn-primary">Aprovar acordo</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGAMENTO PROTEGIDO -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="overline">Pagamento protegido</span>
+          <h2>O negócio só termina quando a entrega acontece.</h2>
+          <p class="lead">O pagamento acompanha cada etapa. A empresa tem a garantia da entrega; o creator, a garantia do recebimento.</p>
+        </div>
+        <div class="panel reveal" style="padding:40px 28px">
+          <div class="timeline" id="timeline">
+            <div class="tl"><span class="node"><svg><use href="#i-lock"/></svg></span><div><b>Valor reservado</b><span>Pago pela empresa e guardado com segurança.</span></div></div>
+            <div class="tl"><span class="node"><svg><use href="#i-upload"/></svg></span><div><b>Conteúdo entregue</b><span>O creator publica e registra a entrega.</span></div></div>
+            <div class="tl"><span class="node"><svg><use href="#i-eye"/></svg></span><div><b>Revisão</b><span>A empresa confere se tudo seguiu o acordo.</span></div></div>
+            <div class="tl"><span class="node"><svg><use href="#i-wallet"/></svg></span><div><b>Pagamento liberado</b><span>O creator recebe conforme o combinado.</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PARA QUEM -->
+    <section class="section" id="para-quem" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="overline">Para quem</span>
+          <h2>Os dois lados ganham.</h2>
+          <p class="lead">Empresas encontram quem vende. Creators encontram quem paga. A ConectaAI cuida do meio do caminho.</p>
+        </div>
+        <div class="aud-grid">
+          <div class="aud reveal">
+            <span class="ic ic-grad"><svg><use href="#i-building"/></svg></span>
+            <h3>Para empresas</h3>
+            <p>De clínicas e lojas locais a marcas nacionais: campanhas com creators sem precisar de agência ou equipe dedicada.</p>
+            <div class="quote">“Quero 10 creators de beleza para minha clínica.”</div>
+            <ul class="checks">
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Campanha a partir de uma frase</b><span>A IA estrutura tudo para você.</span></div></li>
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Creators recomendados</b><span>Com score e justificativa de cada match.</span></div></li>
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Gestão centralizada</b><span>Propostas, acordos, contratos e entregas.</span></div></li>
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Resultados mensuráveis</b><span>Alcance, engajamento e custo por resultado.</span></div></li>
+            </ul>
+            <a class="btn btn-primary" href="./#/register">Criar conta de empresa <svg><use href="#i-arrow-right"/></svg></a>
+          </div>
+          <div class="aud dark reveal">
+            <span class="ic ic-grad"><svg><use href="#i-user-star"/></svg></span>
+            <h3>Para creators</h3>
+            <p>Seja encontrado pelas marcas certas e transforme sua audiência em renda previsível — sem correr atrás de cada oportunidade.</p>
+            <div class="quote">“Quero campanhas de beleza e lifestyle. Meu mínimo é R$ 300.”</div>
+            <ul class="checks">
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Oportunidades compatíveis</b><span>Marcas que combinam com seu nicho e valores.</span></div></li>
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Candidatura em um clique</b><span>Ou receba convites direto das empresas.</span></div></li>
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Recebimento garantido</b><span>Pagamento reservado antes de você começar.</span></div></li>
+              <li><svg><use href="#i-check-circle"/></svg><div><b>Reputação que cresce</b><span>Cada entrega fortalece seu perfil.</span></div></li>
+            </ul>
+            <a class="btn btn-white" href="./#/register">Criar perfil de creator <svg><use href="#i-arrow-right"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTROLE -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="overline">Você no controle</span>
+          <h2>A IA trabalha. Você decide.</h2>
+          <p class="lead">Defina o que pode seguir automaticamente e o que precisa passar por você. Quando algo sair do combinado, você é avisado.</p>
+        </div>
+        <div class="levels">
+          <div class="level reveal"><span class="ic ic-green"><svg><use href="#i-zap"/></svg></span><h3>Dentro do orçamento</h3><p>Propostas que respeitam os limites da campanha seguem sem atrito.</p><span class="pill pill-green">Automático</span></div>
+          <div class="level reveal"><span class="ic"><svg><use href="#i-sliders"/></svg></span><h3>Acima do limite</h3><p>Valores além do teto definido pedem sua confirmação.</p><span class="pill pill-blue">Pede aprovação</span></div>
+          <div class="level reveal"><span class="ic ic-purple"><svg><use href="#i-file-check"/></svg></span><h3>Termos especiais</h3><p>Exclusividade, direitos de uso estendidos e condições fora do padrão.</p><span class="pill pill-purple">Pede aprovação</span></div>
+          <div class="level reveal"><span class="ic" style="background:var(--warning-bg);color:var(--warning)"><svg><use href="#i-bell"/></svg></span><h3>Decisões finais</h3><p>Todo acordo é aprovado por você antes de virar contrato.</p><span class="pill pill-amber">Sempre você</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTADOS -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="overline">Resultados</span>
+          <h2>Sua campanha, em números.</h2>
+          <p class="lead">Acompanhe propostas, acordos, entregas e desempenho em tempo real — em um painel feito para quem não tem tempo a perder.</p>
+        </div>
+        <div class="dash reveal" id="dash">
+          <div class="dash-head">
+            <span class="ic ic-grad" style="width:32px;height:32px;border-radius:10px"><svg style="width:16px;height:16px"><use href="#i-chart"/></svg></span>
+            <b>Clínica Estética · Campanha Novembro</b>
+            <span class="pill pill-green"><svg width="12" height="12"><use href="#i-check"/></svg>Em execução</span>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><small>Creators contratados</small><b>10</b><em>de 14 recomendados</em></div>
+            <div class="kpi"><small>Alcance estimado</small><b>286 mil</b><em>+38% vs. meta</em></div>
+            <div class="kpi"><small>Engajamento médio</small><b>6,4%</b><em>2,1× a média do nicho</em></div>
+            <div class="kpi"><small>Orçamento usado</small><b>R$ 5.640</b><em>R$ 360 abaixo do teto</em></div>
+          </div>
+          <div class="dash-body">
+            <div class="chart">
+              <small>Alcance por semana</small>
+              <div class="chart-bars" id="chartBars">
+                <div data-h="28"></div><div data-h="42"></div><div data-h="55"></div><div data-h="48"></div><div data-h="70"></div><div data-h="86" class="hi"></div><div data-h="64"></div><div data-h="92" class="hi"></div>
+              </div>
+              <div class="chart-x"><span>S1</span><span>S2</span><span>S3</span><span>S4</span><span>S5</span><span>S6</span><span>S7</span><span>S8</span></div>
+            </div>
+            <div class="list">
+              <div class="li"><span class="avatar">MS</span><div>Mariana Souza<span>2 Reels · 4 Stories</span></div><span class="pill pill-green">Entregue</span></div>
+              <div class="li"><span class="avatar" style="background:linear-gradient(135deg,#0D9488,#2454FF)">JR</span><div>Julia Ramos<span>1 Reel · 3 Stories</span></div><span class="pill pill-blue">Em revisão</span></div>
+              <div class="li"><span class="avatar" style="background:linear-gradient(135deg,#D97706,#DB2777)">CL</span><div>Camila Lima<span>2 Reels</span></div><span class="pill pill-purple">Publicando</span></div>
+              <div class="li"><span class="avatar" style="background:linear-gradient(135deg,#2454FF,#7C3AED)">BF</span><div>Bia Ferreira<span>3 Stories</span></div><span class="pill pill-amber">Aguardando você</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="disclaimer">Painel ilustrativo — dados fictícios.</p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="overline">Dúvidas frequentes</span>
+          <h2>Perguntas e respostas.</h2>
+        </div>
+        <div class="faq reveal">
+          <details>
+            <summary>Preciso saber usar ferramentas de marketing?<svg><use href="#i-plus"/></svg></summary>
+            <p>Não. Você descreve o que quer em linguagem natural — por texto ou voz — e a ConectaAI monta a campanha. Você só revisa e ajusta o que quiser.</p>
+          </details>
+          <details>
+            <summary>Como a ConectaAI escolhe os creators?<svg><use href="#i-plus"/></svg></summary>
+            <p>A IA cruza nicho, audiência, localização, engajamento, formato de conteúdo, histórico de entregas e orçamento. Cada recomendação vem com um score de compatibilidade e a explicação do porquê.</p>
+          </details>
+          <details>
+            <summary>Alguma coisa é fechada sem a minha aprovação?<svg><use href="#i-plus"/></svg></summary>
+            <p>Não. Todo acordo passa pela aprovação da empresa e do creator antes de virar contrato. Você também define limites de orçamento e termos que sempre exigem sua confirmação.</p>
+          </details>
+          <details>
+            <summary>Como funciona o pagamento?<svg><use href="#i-plus"/></svg></summary>
+            <p>O valor do acordo é reservado no início. Depois que o creator registra a entrega e a empresa revisa, o pagamento é liberado conforme as condições combinadas — segurança para os dois lados.</p>
+          </details>
+          <details>
+            <summary>Sou creator. Como recebo oportunidades?<svg><use href="#i-plus"/></svg></summary>
+            <p>Crie seu perfil, informe seus nichos, formatos e valores. A ConectaAI recomenda você para campanhas compatíveis e mostra oportunidades abertas para você se candidatar.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="cta reveal">
+          <h2>Qual campanha você quer fazer?</h2>
+          <p>Conte para a ConectaAI. Em minutos você tem a campanha montada e os creators certos na tela.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-white btn-lg" href="./#/register">Começar uma conversa <svg><use href="#i-arrow-right"/></svg></a>
+            <a class="btn btn-outline-white btn-lg" href="./#/login">Já tenho conta</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <span class="logo" style="--h:34px" role="img" aria-label="ConectaAI"></span>
+      <nav class="foot-links" aria-label="Rodapé">
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#para-quem">Para quem</a>
+        <a href="#faq">Dúvidas</a>
+        <a href="./#/login">Entrar</a>
+      </nav>
+      <p>© 2026 ConectaAI. Diga o que você quer fazer — a gente faz acontecer.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Header com borda ao rolar
+      var header = document.querySelector('header');
+      var onScroll = function () { header.classList.toggle('scrolled', window.scrollY > 8); };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      // Conversa animada do hero
+      var chat = document.getElementById('heroChat');
+      var steps = chat.querySelectorAll('[data-step]');
+      var typing = chat.querySelector('.typing');
+      var aiText = chat.querySelector('.ai-text');
+      function showChat() {
+        if (reduce) {
+          steps.forEach(function (s) { s.classList.add('show'); });
+          typing.hidden = true; aiText.hidden = false;
+          return;
+        }
+        setTimeout(function () { steps[0].classList.add('show'); }, 300);
+        setTimeout(function () { steps[1].classList.add('show'); }, 1100);
+        setTimeout(function () { typing.hidden = true; aiText.hidden = false; }, 2300);
+        setTimeout(function () { steps[2].classList.add('show'); }, 2800);
+      }
+      showChat();
+
+      // Animações ao entrar na tela
+      var animate = {
+        matchPanel: function (el) {
+          el.querySelectorAll('.bar i').forEach(function (b) { b.style.width = b.dataset.w + '%'; });
+        },
+        timeline: function (el) {
+          var nodes = el.querySelectorAll('.tl');
+          nodes.forEach(function (n, i) {
+            setTimeout(function () {
+              n.classList.add('on');
+              el.style.setProperty('--progress', (i / (nodes.length - 1)) * 75 + '%');
+            }, reduce ? 0 : 350 * i);
+          });
+        },
+        dash: function (el) {
+          el.querySelectorAll('#chartBars div').forEach(function (b) { b.style.height = b.dataset.h + '%'; });
+        }
+      };
+
+      var targets = document.querySelectorAll('.reveal, #matchPanel, #timeline, #dash');
+      if (!('IntersectionObserver' in window)) {
+        targets.forEach(function (t) { t.classList.add('in'); if (animate[t.id]) animate[t.id](t); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('in');
+          if (animate[e.target.id]) animate[e.target.id](e.target);
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.18 });
+      targets.forEach(function (t) { io.observe(t); });
+    })();
+  </script>
+</body>
+</html>
