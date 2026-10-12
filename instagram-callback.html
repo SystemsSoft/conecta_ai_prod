@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <title>ConectaAI — Conectando o Instagram…</title>
+</head>
+<body>
+  <!--
+    Endereço de retorno do login do Instagram (o "redirect URI" cadastrado no
+    painel da Meta). O Instagram devolve a pessoa aqui com ?code=...&state=...
+    (ou ?error=...). O app Flutter usa rotas com "#", que não podem fazer
+    parte de um redirect URI — por isso esta página só repassa os parâmetros
+    para a rota do app que conclui a conexão (InstagramCallbackScreen).
+  -->
+  <script>
+    window.location.replace('./#/creator/instagram/callback' + window.location.search);
+  </script>
+</body>
+</html>
